@@ -1,0 +1,176 @@
+name: Autograding Tests
+
+on:
+  - push
+  - repository_dispatch
+
+permissions:
+  checks: write
+  actions: read
+  contents: read
+
+jobs:
+  run-autograding-tests-task01:
+    runs-on: ubuntu-latest
+    needs: check-changes
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build testing environment
+        run: |
+          docker build -t custom_student_image .
+      - name: P6T1
+        id: P6T1
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: P6T1
+          command: docker run --rm --name task01 custom_student_image:latest MathTriangulationTest
+          timeout: 1
+          max-score: '1'
+      - name: Update Google Sheets with Task01 results
+        uses: SPGC/ClassroomToSheetsIntegration@master
+        with:
+          student-name: "${{ github.actor }}"
+          robot-email: "${{ secrets.ROBOT_EMAIL }}"
+          private-api-key: "${{ secrets.PRIVATE_API_KEY }}"
+          task-results: "${{ steps.P6T1.outputs.result }}"
+          table-id: "${{ secrets.TABLE_ID }}"
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          P6T1_RESULTS: "${{steps.P6T1.outputs.result}}"
+        with:
+          runners: P6T1
+
+  run-autograding-tests-task02:
+    runs-on: ubuntu-latest
+    needs: check-changes
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build testing environment
+        run: |
+          docker build -t custom_student_image .
+      - name: P6T2
+        id: P6T2
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: P6T2
+          command: docker run --rm --name task02 custom_student_image:latest GetMatchesTest
+          timeout: 1
+          max-score: '1'
+      - name: Update Google Sheets with Task02 results
+        uses: SPGC/ClassroomToSheetsIntegration@master
+        with:
+          student-name: "${{ github.actor }}"
+          robot-email: "${{ secrets.ROBOT_EMAIL }}"
+          private-api-key: "${{ secrets.PRIVATE_API_KEY }}"
+          task-results: "${{ steps.P6T2.outputs.result }}"
+          table-id: "${{ secrets.TABLE_ID }}"
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          P6T2_RESULTS: "${{steps.P6T2.outputs.result}}"
+        with:
+          runners: P6T2
+
+  run-autograding-tests-task03:
+    runs-on: ubuntu-latest
+    needs: check-changes
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build testing environment
+        run: |
+          docker build -t custom_student_image .
+      - name: P6T3
+        id: P6T3
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: P6T3
+          command: docker run --rm --name task03 custom_student_image:latest TriangulationTest
+          timeout: 1
+          max-score: '1'
+      - name: Update Google Sheets with Task03 results
+        uses: SPGC/ClassroomToSheetsIntegration@master
+        with:
+          student-name: "${{ github.actor }}"
+          robot-email: "${{ secrets.ROBOT_EMAIL }}"
+          private-api-key: "${{ secrets.PRIVATE_API_KEY }}"
+          task-results: "${{ steps.P6T3.outputs.result }}"
+          table-id: "${{ secrets.TABLE_ID }}"
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          P6T3_RESULTS: "${{steps.P6T3.outputs.result}}"
+        with:
+          runners: P6T3
+
+  run-autograding-tests-task04:
+    runs-on: ubuntu-latest
+    needs: check-changes
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build testing environment
+        run: |
+          docker build -t custom_student_image .
+      - name: P6T4
+        id: P6T4
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: P6T4
+          command: docker run --rm --name task04 custom_student_image:latest ResectionTest
+          timeout: 1
+          max-score: '1'
+      - name: Update Google Sheets with Task04 results
+        uses: SPGC/ClassroomToSheetsIntegration@master
+        with:
+          student-name: "${{ github.actor }}"
+          robot-email: "${{ secrets.ROBOT_EMAIL }}"
+          private-api-key: "${{ secrets.PRIVATE_API_KEY }}"
+          task-results: "${{ steps.P6T4.outputs.result }}"
+          table-id: "${{ secrets.TABLE_ID }}"
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          P6T4_RESULTS: "${{steps.P6T4.outputs.result}}"
+        with:
+          runners: P6T4
+
+  run-autograding-tests-task05:
+    runs-on: ubuntu-latest
+    needs: check-changes
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build testing environment
+        run: |
+          docker build -t custom_student_image .
+      - name: P6T5
+        id: P6T5
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: P6T5
+          command: docker run --rm --name task05 custom_student_image:latest ConvertToWorldFrameTest
+          timeout: 1
+          max-score: '1'
+      - name: Update Google Sheets with Task04 results
+        uses: SPGC/ClassroomToSheetsIntegration@master
+        with:
+          student-name: "${{ github.actor }}"
+          robot-email: "${{ secrets.ROBOT_EMAIL }}"
+          private-api-key: "${{ secrets.PRIVATE_API_KEY }}"
+          task-results: "${{ steps.P6T5.outputs.result }}"
+          table-id: "${{ secrets.TABLE_ID }}"
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          P6T5_RESULTS: "${{steps.P6T5.outputs.result}}"
+        with:
+          runners: P6T5
