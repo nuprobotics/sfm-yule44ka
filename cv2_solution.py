@@ -6,7 +6,14 @@ from matplotlib.widgets import Slider
 import yaml
 
 
-# Task 2
+def find(value, array):
+    for i, v in enumerate(array):
+        if value.trainIdx == v.queryIdx and value.queryIdx == v.trainIdx:
+            return True
+    return False
+
+
+# First task
 def get_matches(image1, image2) -> typing.Tuple[
     typing.Sequence[cv2.KeyPoint], typing.Sequence[cv2.KeyPoint], typing.Sequence[cv2.DMatch]]:
     sift = cv2.SIFT_create()
@@ -18,9 +25,27 @@ def get_matches(image1, image2) -> typing.Tuple[
     bf = cv2.BFMatcher()
     matches_1_to_2: typing.Sequence[typing.Sequence[cv2.DMatch]] = bf.knnMatch(descriptors1, descriptors2, k=2)
 
-    # YOUR CODE HERE
+    good_1_to_2 = []
+    for m, n in matches_1_to_2:
+        if m.distance < 0.75 * n.distance:
+            good_1_to_2.append(m)
+
+    matches_2_to_1: typing.Sequence[typing.Sequence[cv2.DMatch]] = bf.knnMatch(descriptors2, descriptors1, k=2)
+
+    good_2_to_1 = []
+    for m, n in matches_2_to_1:
+        if m.distance < 0.75 * n.distance:
+            good_2_to_1.append(m)
+
+    good = []
+    for match in good_1_to_2:
+        if find(match, good_2_to_1):
+            good.append(match)
+
+    return kp1, kp2, good
 
 
+# Second task
 def get_second_camera_position(kp1, kp2, matches, camera_matrix):
     coordinates1 = np.array([kp1[match.queryIdx].pt for match in matches])
     coordinates2 = np.array([kp2[match.trainIdx].pt for match in matches])
@@ -29,7 +54,7 @@ def get_second_camera_position(kp1, kp2, matches, camera_matrix):
     return R, t, E
 
 
-# Task 3
+# Third task
 def triangulation(
         camera_matrix: np.ndarray,
         camera1_translation_vector: np.ndarray,
@@ -40,11 +65,16 @@ def triangulation(
         kp2: typing.Sequence[cv2.KeyPoint],
         matches: typing.Sequence[cv2.DMatch]
 ):
-    pass
-    # YOUR CODE HERE
+    P1 = np.dot(camera_matrix, np.hstack((camera1_rotation_matrix, camera1_translation_vector)))
+    P2 = np.dot(camera_matrix, np.hstack((camera2_rotation_matrix, camera2_translation_vector)))
+
+    coordinates1 = np.array([kp1[match.queryIdx].pt for match in matches])
+    coordinates2 = np.array([kp2[match.trainIdx].pt for match in matches])
+
+    points_3d = cv2.triangulatePoints(P1, P2, coordinates1.T, coordinates2.T).T
+    return (points_3d / points_3d[:, 3:4])[..., :3]
 
 
-# Task 4
 def resection(
         image1,
         image2,
@@ -52,13 +82,27 @@ def resection(
         matches,
         points_3d
 ):
-    pass
-    # YOUR CODE HERE
+    keypoints0, keypoints1, new_matches = get_matches(image1, image2)
+
+    points_3d_dict = {match.queryIdx: points_3d[i] for i, match in enumerate(matches)}
+
+    object_points = []
+    image_points = []
+    for match in new_matches:
+        idx = match.queryIdx
+        if idx in points_3d_dict:
+            object_points.append(points_3d_dict[idx])
+            image_points.append(keypoints1[match.trainIdx].pt)
+
+    object_points = np.array(object_points)
+    image_points = np.array(image_points)
+
+    _, rvec, tvec, _ = cv2.solvePnPRansac(object_points, image_points, camera_matrix, np.zeros(5))
+    return cv2.Rodrigues(rvec)[0], tvec
 
 
 def convert_to_world_frame(translation_vector, rotation_matrix):
-    pass
-    # YOUR CODE HERE
+    return -rotation_matrix.T @ translation_vector, rotation_matrix.T
 
 
 def visualisation(
